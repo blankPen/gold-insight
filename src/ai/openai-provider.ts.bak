@@ -1,0 +1,138 @@
+import OpenAI from 'openai';
+import config from '../config';
+import { AIProvider, AIAnalysisContext, AIAnalysisResult } from './provider';
+
+function buildMessages(ctx: AIAnalysisContext): OpenAI.ChatCompletionMessageParam[] {
+  const { alert, snapshot, stats24h, historyContext } = ctx;
+
+  const parts = [
+    `## 告警信息`,
+    `- 类型: ${alert.type}`,
+    `- 标题: ${alert.title}`,
+    `- 当前价格: $${alert.price.toFixed(2)}`,
+    `- 原始描述: ${alert.message}`,
+  ];
+
+  if (stats24h) {
+    parts.push(
+      '', '## 24小时统计',
+      `- 最高: $${stats24h.high24h.toFixed(2)}`,
+      `- 最低: $${stats24h.low24h.toFixed(2)}`,
+      `- 均价: $${stats24h.average24h.toFixed(2)}`,
+    );
+  }
+
+  if (snapshot) {
+    parts.push('', '## 技术指标');
+    if (snapshot.rsi14 !== null) parts.push(`- RSI(14): ${snapshot.rsi14.toFixed(1)}`);
+    if (snapshot.macd) {
+      parts.push(`- MACD Line: ${snapshot.macd.macdLine.toFixed(3)}`);
+      parts.push(`- Signal Line: ${snapshot.macd.signalLine.toFixed(3)}`);
+      parts.push(`- Histogram: ${snapshot.macd.histogram.toFixed(3)}`);
+    }
+    if (snapshot.bollingerBands) {
+      parts.push(`- 布林带上轨: $${snapshot.bollingerBands.upper.toFixed(2)}`);
+      parts.push(`- 布林带中轨: $${snapshot.bollingerBands.middle.toFixed(2)}`);
+      parts.push(`- 布林带下轨: $${snapshot.bollingerBands.lower.toFixed(2)}`);
+    }
+    if (snapshot.sma20 !== null) parts.push(`- SMA(20): $${snapshot.sma20.toFixed(2)}`);
+    if (snapshot.pivotPoints) {
+      parts.push(`- 压力位 R2: $${snapshot.pivotPoints.r2.toFixed(2)}`);
+      parts.push(`- 压力位 R1: $${snapshot.pivotPoints.r1.toFixed(2)}`);
+      parts.push(`- 枢轴点 PP: $${snapshot.pivotPoints.pp.toFixed(2)}`);
+      parts.push(`- 支撑位 S1: $${snapshot.pivotPoints.s1.toFixed(2)}`);
+      parts.push(`- 支撑位 S2: $${snapshot.pivotPoints.s2.toFixed(2)}`);
+    }
+  }
+
+  if (historyContext) {
+    parts.push('', '## 历史分析回顾', historyContext);
+  }
+
+  return [
+    {
+      role: 'system',
+      content: [
+        '你是一位专业的黄金市场分析师。根据告警数据和技术指标给出简洁中文分析。',
+        '请结合历史分析记录（如有），注意价格走势的连续性和趋势变化。',
+        '严格按以下 JSON 格式回复，不要包含 markdown 代码块或其他内容:',
+        '{"analysis":"2-3句的综合市场分析","suggestion":"1句简短的操作建议","confidence":"high/medium/low"}',
+      ].join('\n'),
+    },
+    { role: 'user', content: parts.join('\n') },
+  ];
+}
+
+export class OpenAIProvider implements AIProvider {
+  readonly name: string;
+  private client: OpenAI;
+  private model: string;
+
+  constructor() {
+    this.name = `openai-compat(${config.ai.baseUrl})`;
+    this.client = new OpenAI({
+      apiKey: config.ai.apiKey,
+      baseURL: config.ai.baseUrl,
+    });
+    this.model = config.ai.model;
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return !!config.ai.apiKey;
+  }
+  
+  async ask(messages: OpenAI.ChatCompletionMessageParam[]): Promise<string> {
+    const completion = await this.client.chat.completions.create({
+      model: this.model,
+      messages,
+      temperature: 0.4,
+      max_tokens: 512,
+    });
+    return completion.choices?.[0]?.message?.content?.trim() ?? '';
+  }
+
+  async analyze(ctx: AIAnalysisContext): Promise<AIAnalysisResult | null> {
+    try {
+      const messages = buildMessages(ctx);
+
+      const completion = await this.client.chat.completions.create({
+        model: this.model,
+        messages,
+        temperature: 0.4,
+        max_tokens: 512,
+      });
+
+      const text = completion.choices?.[0]?.message?.content?.trim() ?? '';
+      if (!text) return null;
+
+      try {
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]) as {
+            analysis?: string;
+            suggestion?: string;
+            confidence?: string;
+          };
+          return {
+            enhancedMessage: parsed.analysis || text,
+            suggestion: parsed.suggestion || '',
+            confidence: (['high', 'medium', 'low'].includes(parsed.confidence || '') ? parsed.confidence : 'medium') as 'high' | 'medium' | 'low',
+            raw: text,
+          };
+        }
+      } catch {
+        // JSON parse failed
+      }
+
+      return {
+        enhancedMessage: text,
+        suggestion: '',
+        confidence: 'low',
+        raw: text,
+      };
+    } catch (err) {
+      console.error(`[AI:${this.name}] Analysis failed:`, err);
+      return null;
+    }
+  }
+}
