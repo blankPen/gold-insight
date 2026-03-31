@@ -54,6 +54,35 @@
             position: relative;
         }
 
+        .header-sse-status {
+            position: absolute;
+            top: 0;
+            right: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.4rem 0.85rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            z-index: 2;
+        }
+
+        .header-sse-status .status-value {
+            font-size: 0.72rem;
+            margin: 0;
+        }
+
+        @media (max-width: 520px) {
+            .header-sse-status {
+                font-size: 0.65rem;
+                padding: 0.3rem 0.55rem;
+            }
+        }
+
         header::after {
             content: '';
             position: absolute;
@@ -193,14 +222,15 @@
             transition: color 0.3s ease;
         }
 
+        /* 与 K 线/ETF 一致：涨红跌绿 */
         .price-value.up {
-            color: var(--price-up);
-            text-shadow: 0 0 30px rgba(0, 208, 132, 0.3);
+            color: var(--price-down);
+            text-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
         }
 
         .price-value.down {
-            color: var(--price-down);
-            text-shadow: 0 0 30px rgba(255, 71, 87, 0.3);
+            color: var(--price-up);
+            text-shadow: 0 0 30px rgba(0, 208, 132, 0.3);
         }
 
         .price-value.neutral {
@@ -213,35 +243,148 @@
             margin-left: 0.25rem;
         }
 
-        .price-change {
-            display: inline-flex;
+        .price-changes {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 0.65rem 1rem;
+            margin-top: 2rem;
+            width: 100%;
+        }
+
+        .price-change-row {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
+            justify-content: center;
+            text-align: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.9rem;
             border-radius: 8px;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 500;
             transition: all 0.3s ease;
+            flex: 1 1 8.5rem;
+            min-width: min(100%, 8.5rem);
+            max-width: 14rem;
         }
 
-        .price-change.up {
-            background: rgba(0, 208, 132, 0.1);
-            color: var(--price-up);
+        .price-change-row .chg-label {
+            color: var(--text-secondary);
+            font-size: 0.72rem;
+            text-align: center;
+            font-weight: 500;
+            width: 100%;
         }
 
-        .price-change.down {
+        .price-change-row .chg-values {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            text-align: center;
+        }
+
+        .price-change-row.up {
             background: rgba(255, 71, 87, 0.1);
             color: var(--price-down);
         }
 
-        .price-change.neutral {
+        .price-change-row.down {
+            background: rgba(0, 208, 132, 0.1);
+            color: var(--price-up);
+        }
+
+        .price-change-row.neutral {
             background: rgba(136, 136, 160, 0.1);
             color: var(--text-secondary);
         }
 
-        .arrow {
-            font-size: 1.25rem;
+        .chart-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            align-items: center;
+        }
+
+        .chart-toolbar button {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chart-toolbar button:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold-light);
+        }
+
+        .chart-toolbar button.active {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--accent-gold);
+            color: var(--accent-gold-light);
+        }
+
+        .insight-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .insight-metric {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.65rem 0.75rem;
+        }
+
+        .insight-metric .k {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .insight-metric .v {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: var(--accent-gold-light);
+            margin-top: 0.2rem;
+        }
+
+        .insight-contract-tag {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 0.35rem;
+        }
+
+        .macro-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 900px) {
+            .macro-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .macro-chart-wrap {
+            position: relative;
+            height: 220px;
+            width: 100%;
         }
 
         .chart-container {
@@ -250,42 +393,22 @@
             width: 100%;
         }
 
+        .chart-container .chart-loading-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            height: auto;
+            min-height: 0;
+            margin: 0;
+            background: rgba(10, 10, 15, 0.55);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+
         @media (min-width: 768px) {
             .chart-container {
                 height: 350px;
             }
-        }
-
-        .status-card {
-            grid-column: 1 / -1;
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        @media (max-width: 480px) {
-            .status-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .status-item {
-            text-align: center;
-            padding: 1rem;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-        }
-
-        .status-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
         }
 
         .status-value {
@@ -382,64 +505,46 @@
             grid-column: 1 / -1;
         }
 
-        .push-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.625rem 1.25rem;
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-light));
-            color: var(--bg-primary);
-            border: none;
-            border-radius: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            letter-spacing: 0.02em;
-        }
-
-        .push-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.35);
-        }
-
-        .push-btn:active {
-            transform: translateY(0);
-        }
-
-        .push-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .push-btn .btn-icon {
-            font-size: 1rem;
-        }
-
-        .push-result {
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-            margin-left: 0.75rem;
-            transition: opacity 0.3s ease;
-        }
-
-        .push-result.success {
-            color: var(--price-up);
-        }
-
-        .push-result.fail {
-            color: var(--price-down);
-        }
-
-        .push-row {
-            display: flex;
-            align-items: center;
+        .today-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem 1rem;
             margin-top: 1rem;
             padding-top: 1rem;
             border-top: 1px solid var(--border-color);
+        }
+
+        .today-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            min-width: 0;
+        }
+
+        .today-stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .today-stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .today-stat-val.up {
+            color: var(--price-down);
+        }
+
+        .today-stat-val.down {
+            color: var(--price-up);
+        }
+
+        .today-stat-val.neutral {
+            color: var(--text-primary);
         }
 
         .ai-panel {
@@ -641,6 +746,11 @@
 <body>
     <div class="container">
         <header>
+            <div class="header-sse-status" title="实时行情推送连接">
+                <span class="status-value connecting" id="connectionStatus">
+                    <span class="pulse connecting"></span>连接中...
+                </span>
+            </div>
             <div class="logo">
                 <div class="logo-icon">Au</div>
                 <h1>黄金实时价格</h1>
@@ -660,50 +770,83 @@
                     <div class="price-value neutral" id="priceValue">
                         --<span class="price-currency">USD</span>
                     </div>
-                    <div class="price-change neutral" id="priceChange">
-                        <span class="arrow">→</span>
-                        <span id="changeAmount">--</span>
-                        (<span id="changePercent">--</span>)
+                    <div class="price-changes">
+                        <div class="price-change-row neutral" id="changeDayRow">
+                            <span class="chg-label">今日涨幅</span>
+                            <span class="chg-values">
+                                <span id="changeDayAmount">—</span>
+                                <span id="changeDayPercent">—</span>
+                            </span>
+                        </div>
+                        <div class="price-change-row neutral" id="change1hRow">
+                            <span class="chg-label">1h 涨幅</span>
+                            <span class="chg-values">
+                                <span id="change1hAmount">—</span>
+                                <span id="change1hPercent">—</span>
+                            </span>
+                        </div>
                     </div>
                 </div>
+                <div class="today-stats" aria-label="今日价幅">
+                    <div class="today-stat">
+                        <span class="today-stat-label">今日开盘</span>
+                        <span class="today-stat-val neutral" id="todayOpen">—</span>
+                    </div>
+                    <div class="today-stat">
+                        <span class="today-stat-label">今日最高</span>
+                        <span class="today-stat-val neutral" id="todayHigh">—</span>
+                    </div>
+                    <div class="today-stat">
+                        <span class="today-stat-label">今日最低</span>
+                        <span class="today-stat-val neutral" id="todayLow">—</span>
+                    </div>
+                    <div class="today-stat">
+                        <span class="today-stat-label">昨日收盘</span>
+                        <span class="today-stat-val neutral" id="yesterdayClose">—</span>
+                    </div>
+                </div>
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
             </div>
 
             <div class="card chart-card">
                 <div class="card-title">价格走势</div>
+                <div class="chart-toolbar">
+                    <button type="button" class="tf-btn active" data-candle-unit="second" data-interval="1" data-fetch-hours="6" data-visible-hours="0.25">时分</button>
+                    <button type="button" class="tf-btn" data-candle-unit="minute" data-interval="1" data-fetch-hours="72" data-visible-hours="6">1分</button>
+                    <button type="button" class="tf-btn" data-candle-unit="minute" data-interval="5" data-fetch-hours="168" data-visible-hours="10">5分钟</button>
+                    <button type="button" class="tf-btn" data-candle-unit="minute" data-interval="60" data-fetch-hours="720" data-visible-hours="168">1小时</button>
+                </div>
                 <div class="chart-container">
                     <canvas id="priceChart"></canvas>
-                </div>
-                <div id="chartLoading" class="loading">
-                    <div class="loading-spinner"></div>
-                    <span>等待数据...</span>
+                    <div id="chartLoading" class="loading chart-loading-overlay">
+                        <div class="loading-spinner"></div>
+                        <span>等待数据...</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="card status-card">
-                <div class="card-title">连接状态</div>
-                <div class="status-grid">
-                    <div class="status-item">
-                        <div class="status-label">状态</div>
-                        <div class="status-value connecting" id="connectionStatus">
-                            <span class="pulse connecting"></span>连接中...
-                        </div>
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-title">期权洞察（CME VOI + 实时金价）</div>
+                <div class="insight-contract-tag" id="insightContractLine">合约：—</div>
+                <div class="insight-updated-line" id="insightUpdatedLine" style="display:none;font-size:0.68rem;color:var(--text-muted);margin-top:0.25rem"></div>
+                <div id="insightLoading" class="loading" style="display:none;margin-top:0.5rem"><span>加载洞察...</span></div>
+                <div id="insightError" style="display:none;color:var(--price-down);font-size:0.8rem;margin-top:0.5rem"></div>
+                <div class="insight-metrics" id="insightMetrics"></div>
+            </div>
+
+            <div class="card" style="grid-column: 1 / -1;">
+                <div class="card-title">宏观与持仓（merge 数据）</div>
+                <div id="mergeMeta" style="font-size:0.65rem;color:var(--text-muted);margin-bottom:0.75rem"></div>
+                <div class="macro-grid">
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:0.35rem">黄金 ETF 日增减 <span style="color:var(--text-muted)">（红增 · 绿减）</span></div>
+                        <div class="macro-chart-wrap"><canvas id="chartEtfGold"></canvas></div>
                     </div>
-                    <div class="status-item">
-                        <div class="status-label">更新次数</div>
-                        <div class="status-value" id="updateCount">0</div>
-                    </div>
-                    <div class="status-item">
-                        <div class="status-label">服务器时间</div>
-                        <div class="status-value" id="serverTime">--:--:--</div>
+                    <div>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-bottom:0.35rem">COMEX 黄金库存（吨）</div>
+                        <div class="macro-chart-wrap"><canvas id="chartComexGold"></canvas></div>
                     </div>
                 </div>
-                <div class="push-row">
-                    <button class="push-btn" id="pushNowBtn" onclick="pushNow()">
-                        <span class="btn-icon">📨</span>立即推送到飞书
-                    </button>
-                    <span class="push-result" id="pushResult"></span>
-                </div>
-                <div id="errorMessage" class="error-message" style="display: none;"></div>
             </div>
         </div>
           </div>
@@ -725,30 +868,60 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.4/build/global/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1/dist/chartjs-adapter-luxon.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@0.2.1/dist/chartjs-chart-financial.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script>
         // Global state
         let priceChart = null;
-        let updateCount = 0;
-        let basePrice = null;
         let eventSource = null;
-        const MAX_DATA_POINTS = 60;
-        const chartData = {
-            labels: [],
-            prices: []
+        let headerTodayUp = null;
+        let chartCandleUnit = 'second';
+        let chartCandleInterval = 1;
+        let chartFetchHours = 6;
+        let chartVisibleHours = 0.25;
+        let priceViewportUserSet = false;
+        let chartPollTimer = null;
+        let macroCharts = { etfGold: null, comexGold: null };
+
+        const CANDLE_RED = '#ff4757';
+        const CANDLE_GREEN = '#00d084';
+        const CANDLE_FLAT = '#6a6a7a';
+
+        const macroTooltipPlugin = {
+            backgroundColor: '#1a1a24',
+            titleColor: '#8888a0',
+            bodyColor: '#f0f0f5',
+            bodyFont: {
+                family: 'JetBrains Mono',
+                size: 13,
+                weight: '600'
+            },
+            borderColor: '#2a2a3a',
+            borderWidth: 1,
+            padding: 12,
+            displayColors: false
         };
 
         // DOM Elements
         const priceValueEl = document.getElementById('priceValue');
-        const priceChangeEl = document.getElementById('priceChange');
-        const changeAmountEl = document.getElementById('changeAmount');
-        const changePercentEl = document.getElementById('changePercent');
+        const changeDayRowEl = document.getElementById('changeDayRow');
+        const changeDayAmountEl = document.getElementById('changeDayAmount');
+        const changeDayPercentEl = document.getElementById('changeDayPercent');
+        const change1hRowEl = document.getElementById('change1hRow');
+        const change1hAmountEl = document.getElementById('change1hAmount');
+        const change1hPercentEl = document.getElementById('change1hPercent');
         const updateTimeEl = document.getElementById('updateTime');
         const connectionStatusEl = document.getElementById('connectionStatus');
-        const updateCountEl = document.getElementById('updateCount');
-        const serverTimeEl = document.getElementById('serverTime');
         const errorMessageEl = document.getElementById('errorMessage');
         const chartLoadingEl = document.getElementById('chartLoading');
+        const todayOpenEl = document.getElementById('todayOpen');
+        const todayHighEl = document.getElementById('todayHigh');
+        const todayLowEl = document.getElementById('todayLow');
+        const yesterdayCloseEl = document.getElementById('yesterdayClose');
 
         // Helper Functions
         function formatPrice(price) {
@@ -757,6 +930,112 @@
                 maximumFractionDigits: 2
             });
         }
+
+        const priceExtremaLabelsPlugin = {
+            id: 'priceExtremaLabels',
+            afterDatasetsDraw: function (chart) {
+                if (!chart.canvas || chart.canvas.id !== 'priceChart') {
+                    return;
+                }
+                const ds = chart.data.datasets[0];
+                if (!ds || !ds.data || ds.data.length === 0) {
+                    return;
+                }
+                const xScale = chart.scales.x;
+                const yScale = chart.scales.y;
+                if (!xScale || !yScale) {
+                    return;
+                }
+                const xMin = xScale.min;
+                const xMax = xScale.max;
+                const isLine = chart.config.type === 'line';
+                let bestH = -Infinity;
+                let bestL = Infinity;
+                let highPt = null;
+                let lowPt = null;
+                for (let i = 0; i < ds.data.length; i++) {
+                    const p = ds.data[i];
+                    const tx = p && p.x;
+                    if (tx == null || !Number.isFinite(tx) || tx < xMin || tx > xMax) {
+                        continue;
+                    }
+                    if (isLine) {
+                        const y = p.y;
+                        if (!Number.isFinite(y)) {
+                            continue;
+                        }
+                        if (y > bestH) {
+                            bestH = y;
+                            highPt = p;
+                        }
+                        if (y < bestL) {
+                            bestL = y;
+                            lowPt = p;
+                        }
+                    } else {
+                        const h = p.h;
+                        const l = p.l;
+                        if (!Number.isFinite(h) || !Number.isFinite(l)) {
+                            continue;
+                        }
+                        if (h > bestH) {
+                            bestH = h;
+                            highPt = p;
+                        }
+                        if (l < bestL) {
+                            bestL = l;
+                            lowPt = p;
+                        }
+                    }
+                }
+                if (highPt == null || lowPt == null || !Number.isFinite(bestH) || !Number.isFinite(bestL)) {
+                    return;
+                }
+
+                const ctx = chart.ctx;
+                const area = chart.chartArea;
+                const fmt = function (v) {
+                    return '$' + v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                };
+                function drawPriceTip(text, px, py, color, placeAbove) {
+                    ctx.textAlign = 'center';
+                    ctx.font = '600 10px "JetBrains Mono", "Consolas", monospace';
+                    let yText = placeAbove ? py - 6 : py + 6;
+                    if (placeAbove) {
+                        ctx.textBaseline = 'bottom';
+                        if (yText < area.top + 11) {
+                            yText = area.top + 11;
+                        }
+                    } else {
+                        ctx.textBaseline = 'top';
+                        if (yText > area.bottom - 4) {
+                            yText = area.bottom - 14;
+                        }
+                    }
+                    ctx.strokeStyle = 'rgba(10, 10, 15, 0.92)';
+                    ctx.lineWidth = 3;
+                    ctx.lineJoin = 'round';
+                    ctx.miterLimit = 2;
+                    ctx.strokeText(text, px, yText);
+                    ctx.fillStyle = color;
+                    ctx.fillText(text, px, yText);
+                }
+
+                let pxH = xScale.getPixelForValue(highPt.x);
+                let pyH = yScale.getPixelForValue(isLine ? highPt.y : highPt.h);
+                let pxL = xScale.getPixelForValue(lowPt.x);
+                let pyL = yScale.getPixelForValue(isLine ? lowPt.y : lowPt.l);
+                if (Math.abs(pxH - pxL) < 28 && Math.abs(pyH - pyL) < 20) {
+                    pxL += 40;
+                }
+
+                ctx.save();
+                drawPriceTip(fmt(bestH), pxH, pyH, CANDLE_RED, true);
+                drawPriceTip(fmt(bestL), pxL, pyL, CANDLE_GREEN, false);
+                ctx.restore();
+            }
+        };
+        Chart.register(priceExtremaLabelsPlugin);
 
         function formatChange(change) {
             const sign = change >= 0 ? '+' : '';
@@ -781,53 +1060,244 @@
             });
         }
 
-        function updatePriceDisplay(price, timestamp) {
-            const priceNum = parseFloat(price);
-            
-            // Update price value
-            priceValueEl.innerHTML = formatPrice(priceNum) + '<span class="price-currency">USD</span>';
-            
-            // Calculate 24h change (for demo, using first price as base)
-            if (basePrice === null) {
-                basePrice = priceNum;
-            }
-            
-            const change = priceNum - basePrice;
-            const percentChange = (change / basePrice) * 100;
-            
-            // Update change display
-            changeAmountEl.textContent = formatChange(change);
-            changePercentEl.textContent = formatPercent(percentChange);
-            
-            // Update colors
-            const isUp = change >= 0;
-            priceValueEl.className = 'price-value ' + (isUp ? 'up' : 'down');
-            priceChangeEl.className = 'price-change ' + (isUp ? 'up' : 'down');
-            priceChangeEl.querySelector('.arrow').textContent = isUp ? '↑' : '↓';
-            
-            // Update time
-            updateTimeEl.textContent = formatTime(timestamp);
-            serverTimeEl.textContent = formatTime(timestamp);
+        function candleTimeAxisUnit() {
+            if (chartCandleUnit === 'second') return 'second';
+            if (chartCandleInterval >= 60) return 'day';
+            return 'hour';
         }
 
-        function updateChart(price, timestamp) {
-            // Add new data point
-            chartData.labels.push(formatTime(timestamp));
-            chartData.prices.push(parseFloat(price));
-            
-            // Keep only last MAX_DATA_POINTS
-            if (chartData.labels.length > MAX_DATA_POINTS) {
-                chartData.labels.shift();
-                chartData.prices.shift();
+        /** 秒级走势由 SSE 实时推点；轮询仅做统计与周期性全量校正 */
+        const CHART_POLL_MS = 30000;
+        const SECOND_CHART_RESYNC_EVERY = 4;
+        let chartSecondResyncPhase = 0;
+
+        function candlesToFinancialPoints(candles) {
+            return candles.map(function (c) {
+                const x = new Date(c.t).getTime();
+                return { x: x, o: c.open, h: c.high, l: c.low, c: c.close };
+            });
+        }
+
+        function candlesToLinePoints(candles) {
+            return candles.map(function (c) {
+                return { x: new Date(c.t).getTime(), y: c.close };
+            });
+        }
+
+        function applyDefaultPriceViewport(ohlc) {
+            if (!priceChart || !ohlc || ohlc.length === 0) return;
+            const last = ohlc[ohlc.length - 1].x;
+            const first = ohlc[0].x;
+            const visibleMs = chartVisibleHours * 3600 * 1000;
+            const min = Math.max(first, last - visibleMs);
+            priceChart.options.scales.x.min = min;
+            priceChart.options.scales.x.max = last;
+        }
+
+        function applyHeaderPriceColor() {
+            if (headerTodayUp === null) {
+                priceValueEl.className = 'price-value neutral';
+                return;
             }
-            
-            // Update chart
-            priceChart.data.labels = chartData.labels;
-            priceChart.data.datasets[0].data = chartData.prices;
+            priceValueEl.className = 'price-value ' + (headerTodayUp ? 'up' : 'down');
+        }
+
+        function updatePriceDisplay(price, timestamp) {
+            const priceNum = parseFloat(price);
+            priceValueEl.innerHTML = formatPrice(priceNum) + '<span class="price-currency">USD</span>';
+            applyHeaderPriceColor();
+            updateTimeEl.textContent = formatTime(timestamp);
+        }
+
+        function setChangeRow(rowEl, amountEl, pctEl, change, pct, hasData) {
+            if (!hasData) {
+                amountEl.textContent = '—';
+                pctEl.textContent = '—';
+                rowEl.className = 'price-change-row neutral';
+                return;
+            }
+            const up = change >= 0;
+            amountEl.textContent = formatChange(change);
+            pctEl.textContent = '(' + formatPercent(pct) + ')';
+            rowEl.className = 'price-change-row ' + (up ? 'up' : 'down');
+        }
+
+        function todayStatTone(val, base) {
+            if (val == null || !Number.isFinite(val) || base == null || !Number.isFinite(base) || base === 0) {
+                return 'neutral';
+            }
+            const d = val - base;
+            if (d > 0) {
+                return 'up';
+            }
+            if (d < 0) {
+                return 'down';
+            }
+            return 'neutral';
+        }
+
+        function setTodayOhlcDisplay(today) {
+            const dash = '—';
+            const base = today.yesterdayClose;
+            const yc = today.yesterdayClose;
+            if (yc != null && Number.isFinite(yc) && yc > 0) {
+                yesterdayCloseEl.textContent = '$' + formatPrice(yc);
+            } else {
+                yesterdayCloseEl.textContent = dash;
+            }
+            yesterdayCloseEl.className = 'today-stat-val neutral';
+
+            const o = today.open;
+            todayOpenEl.textContent =
+                o != null && Number.isFinite(o) && o > 0 ? '$' + formatPrice(o) : dash;
+            todayOpenEl.className = 'today-stat-val ' + todayStatTone(o, base);
+
+            const hi = today.high;
+            todayHighEl.textContent = hi != null && Number.isFinite(hi) ? '$' + formatPrice(hi) : dash;
+            todayHighEl.className = 'today-stat-val ' + todayStatTone(hi, base);
+
+            const lo = today.low;
+            todayLowEl.textContent = lo != null && Number.isFinite(lo) ? '$' + formatPrice(lo) : dash;
+            todayLowEl.className = 'today-stat-val ' + todayStatTone(lo, base);
+        }
+
+        async function refreshPriceAnalytics() {
+            try {
+                const res = await fetch('/api/analytics');
+                if (!res.ok) return;
+                const j = await res.json();
+                const today = j.today || {};
+                const h1 = j['1h'] || {};
+                setChangeRow(
+                    changeDayRowEl,
+                    changeDayAmountEl,
+                    changeDayPercentEl,
+                    today.change ?? 0,
+                    today.changePercent ?? 0,
+                    today.hasBaseline === true
+                );
+                setChangeRow(
+                    change1hRowEl,
+                    change1hAmountEl,
+                    change1hPercentEl,
+                    h1.change ?? 0,
+                    h1.changePercent ?? 0,
+                    h1.hasBaseline === true
+                );
+                if (today.hasBaseline === true) {
+                    headerTodayUp = (today.change ?? 0) >= 0;
+                } else {
+                    headerTodayUp = null;
+                }
+                setTodayOhlcDisplay(today);
+                applyHeaderPriceColor();
+            } catch (e) {
+                console.error('涨幅统计加载失败', e);
+            }
+        }
+
+        function applyCandlesToChart(candles) {
+            if (!candles || candles.length === 0) return;
+            const wantLine = chartCandleUnit === 'second';
+            if (priceChart) {
+                const isLine = priceChart.config.type === 'line';
+                if (wantLine !== isLine) {
+                    priceChart.destroy();
+                    priceChart = null;
+                    priceViewportUserSet = false;
+                }
+            }
+            if (!priceChart) {
+                initPriceChart();
+            }
+            const series = wantLine ? candlesToLinePoints(candles) : candlesToFinancialPoints(candles);
+            priceChart.data.datasets[0].data = series;
+            priceChart.options.scales.x.time.unit = candleTimeAxisUnit();
+            const zx = priceChart.options.plugins && priceChart.options.plugins.zoom && priceChart.options.plugins.zoom.limits && priceChart.options.plugins.zoom.limits.x;
+            if (zx) {
+                zx.minRange = chartCandleUnit === 'second' ? 30 * 1000 : 10 * 60 * 1000;
+            }
+            if (!priceViewportUserSet) {
+                applyDefaultPriceViewport(series);
+            }
             priceChart.update('none');
-            
-            // Hide loading
             chartLoadingEl.style.display = 'none';
+        }
+
+        function applySecondTickToLineChart(price, timestampIso) {
+            if (chartCandleUnit !== 'second' || !priceChart || priceChart.config.type !== 'line') {
+                return;
+            }
+            const y = typeof price === 'number' ? price : parseFloat(price);
+            if (!Number.isFinite(y)) {
+                return;
+            }
+            const t = new Date(timestampIso).getTime();
+            if (Number.isNaN(t)) {
+                return;
+            }
+            const bucketMs = Math.floor(t / 1000) * 1000;
+            const data = priceChart.data.datasets[0].data;
+            const last = data.length > 0 ? data[data.length - 1] : null;
+            if (last && last.x === bucketMs) {
+                last.y = y;
+            } else {
+                data.push({ x: bucketMs, y: y });
+            }
+            const cutoff = Date.now() - chartFetchHours * 3600 * 1000;
+            while (data.length > 0 && data[0].x < cutoff) {
+                data.shift();
+            }
+            priceChart.options.scales.x.time.unit = candleTimeAxisUnit();
+            const zx = priceChart.options.plugins && priceChart.options.plugins.zoom && priceChart.options.plugins.zoom.limits && priceChart.options.plugins.zoom.limits.x;
+            if (zx) {
+                zx.minRange = 30 * 1000;
+            }
+            if (!priceViewportUserSet) {
+                applyDefaultPriceViewport(data);
+            }
+            priceChart.update('none');
+            chartLoadingEl.style.display = 'none';
+        }
+
+        async function loadCandles() {
+            if (!priceChart) return;
+            try {
+                let url = '/api/history/candles?interval=' + chartCandleInterval + '&hours=' + chartFetchHours;
+                if (chartCandleUnit === 'second') {
+                    url += '&unit=second';
+                }
+                const res = await fetch(url);
+                const json = await res.json();
+                if (json.candles && json.candles.length > 0) {
+                    applyCandlesToChart(json.candles);
+                    const last = json.candles[json.candles.length - 1];
+                    updatePriceDisplay(last.close, last.t);
+                }
+            } catch (e) {
+                console.error('K线加载失败', e);
+            }
+        }
+
+        function startChartPolling() {
+            if (chartPollTimer) {
+                clearInterval(chartPollTimer);
+            }
+            chartSecondResyncPhase = 0;
+            chartPollTimer = setInterval(function () {
+                if (chartCandleUnit === 'second') {
+                    refreshPriceAnalytics();
+                    chartSecondResyncPhase += 1;
+                    if (chartSecondResyncPhase >= SECOND_CHART_RESYNC_EVERY) {
+                        chartSecondResyncPhase = 0;
+                        loadCandles();
+                    }
+                } else {
+                    chartSecondResyncPhase = 0;
+                    loadCandles();
+                    refreshPriceAnalytics();
+                }
+            }, CHART_POLL_MS);
         }
 
         function showConnectionStatus(status) {
@@ -859,103 +1329,182 @@
             errorMessageEl.style.display = 'none';
         }
 
-        function initChart() {
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            
-            // Create gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(212, 175, 55, 0.3)');
-            gradient.addColorStop(1, 'rgba(212, 175, 55, 0)');
-            
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'XAUUSD',
-                        data: [],
-                        borderColor: '#d4af37',
-                        backgroundColor: gradient,
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHoverRadius: 4,
-                        pointHoverBackgroundColor: '#d4af37',
-                        pointHoverBorderColor: '#fff',
-                        pointHoverBorderWidth: 2
-                    }]
+        function makePriceChartOptions(isLine) {
+            const tooltipCallbacks = isLine
+                ? {
+                    title: function (items) {
+                        if (!items || !items.length) return '';
+                        const r = items[0].raw;
+                        if (!r || r.x == null) return '';
+                        return new Date(r.x).toLocaleString('zh-CN', { hour12: false });
+                    },
+                    label: function (context) {
+                        const y = context.parsed.y;
+                        if (y == null || Number.isNaN(y)) return '';
+                        return '价格 $' + formatPrice(y);
+                    }
+                }
+                : {
+                    title: function (items) {
+                        if (!items || !items.length) return '';
+                        const r = items[0].raw;
+                        if (!r || r.x == null) return '';
+                        return new Date(r.x).toLocaleString('zh-CN', { hour12: false });
+                    },
+                    label: function (context) {
+                        const r = context.raw;
+                        if (!r) return '';
+                        return [
+                            '开 $' + formatPrice(r.o),
+                            '高 $' + formatPrice(r.h),
+                            '低 $' + formatPrice(r.l),
+                            '收 $' + formatPrice(r.c)
+                        ];
+                    }
+                };
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        top: 18,
+                        bottom: 20,
+                        left: 0,
+                        right: 2
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 0
+                animation: {
+                    duration: 0
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     },
-                    interaction: {
-                        intersect: false,
-                        mode: 'index'
-                    },
-                    plugins: {
-                        legend: {
-                            display: false
+                    tooltip: {
+                        backgroundColor: '#1a1a24',
+                        titleColor: '#8888a0',
+                        bodyColor: '#f0f0f5',
+                        bodyFont: {
+                            family: 'JetBrains Mono',
+                            size: 13,
+                            weight: '600'
                         },
-                        tooltip: {
-                            backgroundColor: '#1a1a24',
-                            titleColor: '#8888a0',
-                            bodyColor: '#f0f0f5',
-                            bodyFont: {
-                                family: 'JetBrains Mono',
-                                size: 14,
-                                weight: '600'
+                        borderColor: '#2a2a3a',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: false,
+                        callbacks: tooltipCallbacks
+                    },
+                    zoom: {
+                        limits: {
+                            x: {
+                                min: 'original',
+                                max: 'original',
+                                minRange: isLine ? 30 * 1000 : 10 * 60 * 1000
+                            }
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'x',
+                            onPanComplete: function () {
+                                priceViewportUserSet = true;
+                            }
+                        },
+                        zoom: {
+                            wheel: {
+                                enabled: true
                             },
-                            borderColor: '#2a2a3a',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false,
-                            callbacks: {
-                                label: function(context) {
-                                    return ' $' + formatPrice(context.parsed.y);
-                                }
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'x',
+                            onZoomComplete: function () {
+                                priceViewportUserSet = true;
                             }
                         }
-                    },
-                    scales: {
-                        x: {
-                            display: true,
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                color: '#555566',
-                                font: {
-                                    family: 'JetBrains Mono',
-                                    size: 10
-                                },
-                                maxRotation: 0,
-                                maxTicksLimit: 6
-                            }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        display: true,
+                        grid: {
+                            display: false
                         },
-                        y: {
-                            display: true,
-                            position: 'right',
-                            grid: {
-                                color: '#2a2a3a',
-                                drawBorder: false
+                        time: {
+                            unit: 'hour'
+                        },
+                        ticks: {
+                            color: '#555566',
+                            font: {
+                                family: 'JetBrains Mono',
+                                size: 10
                             },
-                            ticks: {
-                                color: '#555566',
-                                font: {
-                                    family: 'JetBrains Mono',
-                                    size: 11
-                                },
-                                callback: function(value) {
-                                    return '$' + value.toFixed(0);
-                                }
+                            maxRotation: 0,
+                            maxTicksLimit: 10
+                        }
+                    },
+                    y: {
+                        display: true,
+                        position: 'right',
+                        grace: '14%',
+                        grid: {
+                            color: '#2a2a3a',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#555566',
+                            font: {
+                                family: 'JetBrains Mono',
+                                size: 11
+                            },
+                            callback: function (value) {
+                                return '$' + value.toFixed(0);
                             }
                         }
                     }
                 }
+            };
+        }
+
+        function initPriceChart() {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            const isLine = chartCandleUnit === 'second';
+            priceChart = new Chart(ctx, {
+                type: isLine ? 'line' : 'candlestick',
+                data: {
+                    datasets: isLine
+                        ? [{
+                            label: 'XAUUSD',
+                            data: [],
+                            borderColor: '#7dd3c0',
+                            backgroundColor: 'rgba(125, 211, 192, 0.12)',
+                            borderWidth: 1.5,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0
+                        }]
+                        : [{
+                            label: 'XAUUSD',
+                            data: [],
+                            borderColors: {
+                                up: CANDLE_RED,
+                                down: CANDLE_GREEN,
+                                unchanged: CANDLE_FLAT
+                            },
+                            backgroundColors: {
+                                up: CANDLE_RED,
+                                down: CANDLE_GREEN,
+                                unchanged: CANDLE_FLAT
+                            }
+                        }]
+                },
+                options: makePriceChartOptions(isLine)
             });
         }
 
@@ -968,6 +1517,7 @@
             eventSource.onopen = function() {
                 showConnectionStatus('connected');
                 console.log('SSE connected');
+                refreshPriceAnalytics();
             };
             
             eventSource.addEventListener('connected', function(event) {
@@ -979,14 +1529,8 @@
                 const data = JSON.parse(event.data);
                 const price = data.price;
                 const timestamp = data.timestamp;
-                
-                // Update display
                 updatePriceDisplay(price, timestamp);
-                updateChart(price, timestamp);
-                
-                // Update count
-                updateCount++;
-                updateCountEl.textContent = updateCount;
+                applySecondTickToLineChart(price, timestamp);
             });
             
             eventSource.onerror = function(err) {
@@ -1000,60 +1544,253 @@
             };
         }
 
-        async function loadHistoryData() {
+        function wireTimeframeButtons() {
+            document.querySelectorAll('.tf-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    chartCandleUnit = btn.getAttribute('data-candle-unit') === 'second' ? 'second' : 'minute';
+                    chartCandleInterval = Number(btn.getAttribute('data-interval')) || 1;
+                    chartFetchHours = Number(btn.getAttribute('data-fetch-hours')) || 72;
+                    chartVisibleHours = Number(btn.getAttribute('data-visible-hours')) || 6;
+                    priceViewportUserSet = false;
+                    chartLoadingEl.style.display = 'flex';
+                    startChartPolling();
+                    loadCandles();
+                });
+            });
+        }
+
+        function fmtNum(n, d) {
+            if (n == null || Number.isNaN(n)) return '—';
+            return Number(n).toFixed(d);
+        }
+
+        function formatInsightUpdatedAt(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return String(iso);
+            return d.toLocaleString('zh-CN', { hour12: false });
+        }
+
+        async function loadInsightMetrics() {
+            const box = document.getElementById('insightMetrics');
+            const errEl = document.getElementById('insightError');
+            const loadEl = document.getElementById('insightLoading');
+            const lineEl = document.getElementById('insightContractLine');
+            const updatedLineEl = document.getElementById('insightUpdatedLine');
+            errEl.style.display = 'none';
+            updatedLineEl.style.display = 'none';
+            updatedLineEl.textContent = '';
+            loadEl.style.display = 'block';
             try {
-                const response = await fetch('/api/history?hours=1&limit=' + MAX_DATA_POINTS);
-                const result = await response.json();
-                
-                if (result.data && result.data.length > 0) {
-                    chartData.labels = result.data.map(p => formatTime(p.timestamp));
-                    chartData.prices = result.data.map(p => parseFloat(p.price));
-                    
-                    priceChart.data.labels = chartData.labels;
-                    priceChart.data.datasets[0].data = chartData.prices;
-                    priceChart.update('none');
-                    
-                    const latestData = result.data[result.data.length - 1];
-                    basePrice = parseFloat(result.data[0].price);
-                    updatePriceDisplay(latestData.price, latestData.timestamp);
-                    
-                    chartLoadingEl.style.display = 'none';
-                    updateCount = result.data.length;
-                    updateCountEl.textContent = updateCount;
-                    
-                    console.log('历史数据已加载:', result.data.length, '条');
+                const res = await fetch('/api/insight/metrics');
+                const j = await res.json();
+                loadEl.style.display = 'none';
+                if (!res.ok) {
+                    errEl.textContent = j.error || j.hint || '洞察不可用';
+                    errEl.style.display = 'block';
+                    box.innerHTML = '';
+                    return;
                 }
-            } catch (error) {
-                console.error('加载历史数据失败:', error);
+                const meta = j.meta || {};
+                const c = j.contract;
+                const pc = meta.primary_contract;
+                const ltd = (c && c.ltd_ymd) || meta.primary_contract_ltd;
+                const contractLabel = (c && c.contract) || pc || '—';
+                lineEl.textContent = '合约：' + contractLabel + (ltd ? ' · LTD ' + ltd : '');
+                const upd = meta.insight_data_updated_at;
+                if (upd) {
+                    let uText = '数据更新：' + formatInsightUpdatedAt(upd);
+                    if (meta.insight_voi_trade_date) {
+                        uText += ' · VOI 交易日 ' + meta.insight_voi_trade_date;
+                    }
+                    if (meta.insight_stale_fallback) {
+                        uText += ' · 已回退至历史快照';
+                    }
+                    updatedLineEl.textContent = uText;
+                    updatedLineEl.style.display = 'block';
+                }
+                if (!c) {
+                    errEl.textContent = '暂无可用的期权指标（已尝试当前数据与历史快照）';
+                    errEl.style.display = 'block';
+                    box.innerHTML = '';
+                    return;
+                }
+                if (c.chart_error) {
+                    errEl.textContent = c.chart_error;
+                    errEl.style.display = 'block';
+                    box.innerHTML = '';
+                    return;
+                }
+                const d = c.daily || {};
+                const rows = [
+                    ['最大痛苦', fmtNum(c.max_pain, 0)],
+                    ['现货偏离%', fmtNum(c.price_deviation_pct, 2)],
+                    ['ATM 行权价', fmtNum(c.atm_strike, 0)],
+                    ['Delta 中性', fmtNum(c.delta_neutral_strike, 1)],
+                    ['Gamma 加权', fmtNum(c.gamma_weighted_strike, 1)],
+                    ['净 Delta 零', fmtNum(c.net_delta_zero_strike, 0)],
+                    ['总 OI', d.total_oi != null ? String(d.total_oi) : '—'],
+                    ['PCR', d.pcr != null ? fmtNum(d.pcr, 3) : '—'],
+                ];
+                box.innerHTML = rows.map(function(kv) {
+                    return '<div class="insight-metric"><div class="k">' + kv[0] + '</div><div class="v">' + kv[1] + '</div></div>';
+                }).join('');
+            } catch (e) {
+                loadEl.style.display = 'none';
+                errEl.textContent = '洞察请求失败';
+                errEl.style.display = 'block';
             }
         }
 
-        async function pushNow() {
-            const btn = document.getElementById('pushNowBtn');
-            const result = document.getElementById('pushResult');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="btn-icon">⏳</span>推送中...';
-            result.textContent = '';
-            result.className = 'push-result';
-
-            try {
-                const res = await fetch('/api/alerts/push-now', { method: 'POST' });
-                const data = await res.json();
-                if (data.success) {
-                    result.textContent = '✓ 推送成功';
-                    result.className = 'push-result success';
-                } else {
-                    result.textContent = '✗ ' + (data.message || '推送失败');
-                    result.className = 'push-result fail';
+        function makeLineChart(canvasId, labels, values, borderColor, fillColor) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '',
+                        data: values,
+                        borderColor: borderColor,
+                        backgroundColor: fillColor || 'rgba(212, 175, 55, 0.12)',
+                        borderWidth: 1.5,
+                        fill: true,
+                        tension: 0.25,
+                        pointRadius: 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: Object.assign({}, macroTooltipPlugin, {
+                            callbacks: {
+                                label: function (context) {
+                                    const v = context.parsed.y;
+                                    if (v == null || Number.isNaN(v)) return '';
+                                    return ' ' + fmtNum(v, 2);
+                                }
+                            }
+                        })
+                    },
+                    scales: {
+                        x: { ticks: { color: '#555566', maxRotation: 0, maxTicksLimit: 6 } },
+                        y: { ticks: { color: '#555566' }, grid: { color: '#2a2a3a' } }
+                    }
                 }
-            } catch (err) {
-                result.textContent = '✗ 网络错误';
-                result.className = 'push-result fail';
-            }
+            });
+        }
 
-            btn.disabled = false;
-            btn.innerHTML = '<span class="btn-icon">📨</span>立即推送到飞书';
-            setTimeout(() => { result.textContent = ''; }, 5000);
+        /** ETF 当日相对前一日的库存变化：柱状图，红增绿减（与 A 股配色习惯一致） */
+        function makeEtfDailyChangeBarChart(canvasId, labels, dailyChanges) {
+            const redUp = '#ff4757';
+            const greenDown = '#00d084';
+            const colors = dailyChanges.map(function (v) {
+                const n = Number(v);
+                if (!Number.isFinite(n)) return '#555566';
+                if (n > 0) return redUp;
+                if (n < 0) return greenDown;
+                return '#6a6a7a';
+            });
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '日增减',
+                        data: dailyChanges,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 0,
+                        borderRadius: 3,
+                        maxBarThickness: 14,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 0 },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: Object.assign({}, macroTooltipPlugin, {
+                            callbacks: {
+                                label: function (context) {
+                                    const v = context.parsed.y;
+                                    if (v == null || Number.isNaN(v)) return '';
+                                    return ' ' + fmtNum(v, 2);
+                                }
+                            }
+                        })
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#555566', maxRotation: 0, maxTicksLimit: 8 },
+                            grid: { display: false },
+                        },
+                        y: {
+                            ticks: { color: '#555566' },
+                            grid: { color: '#2a2a3a' },
+                        },
+                    },
+                },
+            });
+        }
+
+        async function loadMergeSeries() {
+            const metaEl = document.getElementById('mergeMeta');
+            try {
+                const res = await fetch('/api/insight/merge-series?kinds=etf_gold,comex_gold&limit=365');
+                const bundle = await res.json();
+                if (bundle.merge_state) {
+                    metaEl.textContent = '快照：' + (bundle.merge_state.last_snapshot_id || '—') +
+                        ' · 更新 ' + (bundle.merge_state.updated_at || '—');
+                }
+                const items = bundle.items || [];
+                const byKind = {};
+                items.forEach(function(it) { byKind[it.kind] = it; });
+
+                function one(kind, chartKey, canvasId, seriesIdx, borderColor, fillColor) {
+                    const it = byKind[kind];
+                    if (!it || !it.available || !it.labels || it.labels.length === 0) return;
+                    const s = it.series[seriesIdx];
+                    if (!s) return;
+                    if (macroCharts[chartKey]) {
+                        macroCharts[chartKey].destroy();
+                        macroCharts[chartKey] = null;
+                    }
+                    macroCharts[chartKey] = makeLineChart(canvasId, it.labels, s.data, borderColor, fillColor);
+                }
+
+                function oneEtfBar(kind, chartKey, canvasId) {
+                    const it = byKind[kind];
+                    if (!it || !it.available || !it.labels || it.labels.length === 0) return;
+                    const ch = it.series[1];
+                    if (!ch || !ch.data || ch.data.length === 0) return;
+                    if (macroCharts[chartKey]) {
+                        macroCharts[chartKey].destroy();
+                        macroCharts[chartKey] = null;
+                    }
+                    macroCharts[chartKey] = makeEtfDailyChangeBarChart(canvasId, it.labels, ch.data);
+                }
+
+                oneEtfBar('etf_gold', 'etfGold', 'chartEtfGold');
+                one('comex_gold', 'comexGold', 'chartComexGold', 0, 'rgb(212, 175, 55)', 'rgba(212, 175, 55, 0.12)');
+            } catch (e) {
+                metaEl.textContent = 'merge 数据加载失败';
+            }
         }
 
         // ── AI Analysis Logs Panel ──────────────────────────────
@@ -1151,8 +1888,15 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            initChart();
-            loadHistoryData();
+            initPriceChart();
+            wireTimeframeButtons();
+            loadCandles();
+            refreshPriceAnalytics();
+            startChartPolling();
+            loadInsightMetrics();
+            setInterval(loadInsightMetrics, 45000);
+            loadMergeSeries();
+            setInterval(loadMergeSeries, 600000);
             connectSSE();
             loadAnalysisLogs();
             setInterval(pollAnalysisLogs, AI_POLL_INTERVAL);

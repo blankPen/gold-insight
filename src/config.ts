@@ -31,6 +31,9 @@ export interface Config {
   feishu: FeishuConfig;
   alertRules: AlertRulesConfig;
   ai: AIConfig;
+  insightSyncEnabled: boolean;
+  insightSyncIntervalMs: number;
+  insightMergeRoot: string;
 }
 
 const DEFAULTS = {
@@ -85,6 +88,14 @@ function getConfig(): Config {
 
   const analysisIntervalMinutes = toInt(process.env.ANALYSIS_INTERVAL_MINUTES, 5);
 
+  const insightSyncEnabled = 
+    process.env.INSIGHT_SYNC_ENABLED === '1' || process.env.INSIGHT_SYNC_ENABLED === 'true';
+  const insightSyncIntervalMs = toInt(
+    process.env.INSIGHT_SYNC_INTERVAL_MS,
+    3 * 60 * 60 * 1000,
+  );
+  const insightMergeRoot = process.env.INSIGHT_MERGE_ROOT || '';
+
   const ai: AIConfig = {
     provider: process.env.AI_PROVIDER || 'openai',
     model: process.env.AI_MODEL || 'MiniMax-M2.5',
@@ -102,6 +113,9 @@ function getConfig(): Config {
     feishu,
     alertRules,
     ai,
+    insightSyncEnabled,
+    insightSyncIntervalMs,
+    insightMergeRoot,
   };
   return config;
 }

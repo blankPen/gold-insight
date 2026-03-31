@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
-import { chromium, Browser, Page } from 'playwright';
+import { chromium, Browser, Page, LaunchOptions } from 'playwright';
+import os from 'os';
 import { addPrice } from './db';
 
 export const priceEmitter = new EventEmitter();
@@ -17,7 +18,9 @@ async function initializeBrowser(): Promise<void> {
   if (browser) return;
 
   console.log('[Scraper] Launching browser...');
-  browser = await chromium.launch({
+
+
+  const config: LaunchOptions = {
     headless: true,
     channel: 'chromium-headless-shell',
     proxy: { server: 'http://127.0.0.1:7890' },
@@ -27,7 +30,13 @@ async function initializeBrowser(): Promise<void> {
       '--disable-dev-shm-usage',
       '--disable-blink-features=AutomationControlled',
     ],
-  });
+  }
+  if (os.platform() === 'darwin') {
+    config.channel = 'chrome';
+    config.executablePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+  }
+
+  browser = await chromium.launch(config);
 
   console.log('[Scraper] Creating new page...');
   page = await browser.newPage({

@@ -1,0 +1,9 @@
+{
+  "last_snapshot_id": "2026-03-31",
+  "updated_at": "2026-03-31T04:48:18.681Z",
+  "cme_voi": {
+    "xls_path": "data/snapshots/2026-03-31/cme-voi-20260330.xls",
+    "parsed_json_path": "data/merge/cme-voi/parsed.json",
+    "trade_date": "20260330"
+  }
+}

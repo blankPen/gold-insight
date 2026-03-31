@@ -1,9 +1,9 @@
 {
   "name": "gold-price-service",
   "version": "0.1.0",
-  "type": "commonjs",
+  "type": "module",
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "start": "tsx src/index.ts",
     "build": "tsc",
     "pm2:start": "pm2 start ecosystem.config.js",
     "pm2:stop": "pm2 stop gold-price",
@@ -21,7 +21,11 @@
     "playwright": "^1.58.2",
     "ts-node": "^10.9.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "axios": "^1.13.6",
+    "https-proxy-agent": "^8.0.0",
+    "pdf-parse": "^1.1.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

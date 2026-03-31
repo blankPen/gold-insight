@@ -1,8 +1,8 @@
-import { AIProvider, AIAnalysisContext, AIAnalysisResult } from './provider';
+import type { AIProvider, AIAnalysisContext, AIAnalysisResult } from './provider';
 import { OpenAIProvider } from './openai-provider';
 import config from '../config';
 
-export { AIProvider, AIAnalysisContext, AIAnalysisResult } from './provider';
+export type { AIProvider, AIAnalysisContext, AIAnalysisResult } from './provider';
 
 class NoopProvider implements AIProvider {
   readonly name = 'noop';

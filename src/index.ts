@@ -1,5 +1,8 @@
 import Fastify from 'fastify';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 import fastifyStatic from '@fastify/static';
 import { registerRoutes } from './routes';
 import { registerSSE } from './sse';
@@ -7,6 +10,7 @@ import db, { closeDb } from './db';
 import config from './config';
 import * as ScraperModule from './scraper';
 import { monitor } from './monitor';
+import { startInsightScheduler, stopInsightScheduler } from './insight-scheduler';
 
 let fastifyInstance: any;
 let sseManager: any;
@@ -14,7 +18,7 @@ let sseManager: any;
 async function start() {
   fastifyInstance = Fastify({ logger: true });
   fastifyInstance.register(fastifyStatic, {
-    root: path.join(__dirname, 'public'),
+    root: path.join(moduleDir, 'public'),
     prefix: '/public/',
   });
 
@@ -59,6 +63,13 @@ async function start() {
     fastifyInstance.log.warn('Monitor start warning', e as any);
   }
 
+  // 4.6) Insight merge sync on a timer (optional)
+  try {
+    startInsightScheduler(fastifyInstance.log);
+  } catch (e) {
+    fastifyInstance.log.warn('Insight scheduler start warning', e as any);
+  }
+
   // 5) Start HTTP server
   try {
     await fastifyInstance.listen({ port: config.port, host: '0.0.0.0' });
@@ -80,6 +91,12 @@ async function start() {
     try {
       monitor.stop();
       fastifyInstance.log.info('Monitor stopped');
+    } catch {
+      // ignore
+    }
+    try {
+      stopInsightScheduler();
+      fastifyInstance.log.info('Insight scheduler stopped');
     } catch {
       // ignore
     }

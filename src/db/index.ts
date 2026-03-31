@@ -1,9 +1,22 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
 import type { Alert } from '../alert-engine';
 import type { AIAnalysisResult } from '../ai/provider';
 
-type PricePoint = { price: number; timestamp: string };
+export type PricePoint = { price: number; timestamp: string };
+
+export type Candle = {
+  t: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+};
+
+const MAX_PRICE_ROWS_FOR_CANDLES = 500_000;
 
 export interface AnalysisLogRow {
   id: number;
@@ -22,7 +35,7 @@ export interface AnalysisLogRow {
 }
 
 // 数据库文件路径
-const DB_PATH = path.join(__dirname, '../../data/gold-price.db');
+const DB_PATH = path.join(moduleDir, '../../data/gold-price.db');
 
 // 初始化数据库
 const db = new Database(DB_PATH);
@@ -117,6 +130,88 @@ export async function getHistory(hours: number, limit: number): Promise<PricePoi
   return rows;
 }
 
+/** 不早于 cutoffIso 的第一条报价（用于「今日开盘」等基准价） */
+export function getFirstPriceAtOrAfter(cutoffIso: string): PricePoint | undefined {
+  return db
+    .prepare(
+      `SELECT price, timestamp FROM prices
+       WHERE timestamp >= ?
+       ORDER BY timestamp ASC
+       LIMIT 1`,
+    )
+    .get(cutoffIso) as PricePoint | undefined;
+}
+
+/** 严格早于 cutoffIso 的最后一条报价（用于「昨日收盘」等） */
+export function getLastPriceBefore(cutoffIso: string): PricePoint | undefined {
+  return db
+    .prepare(
+      `SELECT price, timestamp FROM prices
+       WHERE timestamp < ?
+       ORDER BY timestamp DESC
+       LIMIT 1`,
+    )
+    .get(cutoffIso) as PricePoint | undefined;
+}
+
+/** 时间窗内按时间正序的 tick，上限 maxRows（防 OOM） */
+export function getPricePointsSince(cutoffIso: string, maxRows: number): PricePoint[] {
+  const cap = Math.min(Math.max(1, maxRows), MAX_PRICE_ROWS_FOR_CANDLES);
+  return db
+    .prepare(
+      `SELECT price, timestamp FROM prices
+       WHERE timestamp >= ?
+       ORDER BY timestamp ASC
+       LIMIT ?`,
+    )
+    .all(cutoffIso, cap) as PricePoint[];
+}
+
+/**
+ * 将有序 tick 聚合为 K 线；bucket 以 UTC epoch 秒对齐 bucketSeconds。
+ */
+export function aggregateCandles(points: PricePoint[], bucketSeconds: number): Candle[] {
+  if (points.length === 0 || bucketSeconds < 1) {
+    return [];
+  }
+  const bucketSec = bucketSeconds;
+  const buckets = new Map<
+    number,
+    { open: number; high: number; low: number; close: number }
+  >();
+
+  for (const p of points) {
+    const sec = Math.floor(new Date(p.timestamp).getTime() / 1000);
+    const bucketStart = Math.floor(sec / bucketSec) * bucketSec;
+    const price = p.price;
+    const prev = buckets.get(bucketStart);
+    if (prev == null) {
+      buckets.set(bucketStart, {
+        open: price,
+        high: price,
+        low: price,
+        close: price,
+      });
+    } else {
+      prev.high = Math.max(prev.high, price);
+      prev.low = Math.min(prev.low, price);
+      prev.close = price;
+    }
+  }
+
+  const keys = Array.from(buckets.keys()).sort((a, b) => a - b);
+  return keys.map((k) => {
+    const b = buckets.get(k)!;
+    return {
+      t: new Date(k * 1000).toISOString(),
+      open: b.open,
+      high: b.high,
+      low: b.low,
+      close: b.close,
+    };
+  });
+}
+
 // 获取24小时统计
 export async function getStats24h(): Promise<{ high24h: number; low24h: number; average24h: number; updateCount: number }> {
   return getStatsForHours(24);
@@ -140,6 +235,21 @@ export async function getStatsForHours(hours: number): Promise<{ high24h: number
     low24h: Math.min(...prices),
     average24h: prices.reduce((a, b) => a + b, 0) / prices.length,
     updateCount: prices.length
+  };
+}
+
+/** 自 cutoffIso（含）起的最高价、最低价等（用于上海自然日「今日」） */
+export async function getStatsSince(cutoffIso: string): Promise<{ high: number; low: number; average: number; updateCount: number }> {
+  const rows = db.prepare(`SELECT price FROM prices WHERE timestamp >= ?`).all(cutoffIso) as { price: number }[];
+  const prices = rows.map((r) => r.price);
+  if (prices.length === 0) {
+    return { high: 0, low: 0, average: 0, updateCount: 0 };
+  }
+  return {
+    high: Math.max(...prices),
+    low: Math.min(...prices),
+    average: prices.reduce((a, b) => a + b, 0) / prices.length,
+    updateCount: prices.length,
   };
 }
 
@@ -220,6 +330,7 @@ export function closeDb(): void {
 }
 
 export default {
-  getLatestPrice, getHistory, getStats24h, getStatsForHours, addPrice,
+  getLatestPrice, getHistory, getStats24h, getStatsForHours, getStatsSince, addPrice,
   addAnalysisLog, getAnalysisLogs, getAnalysisLogsSince, getRecentAnalysisSummary,
+  getPricePointsSince, getFirstPriceAtOrAfter, getLastPriceBefore, aggregateCandles,
 };
